@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import RetroButton from '../components/RetroButton';
 import { obtenerNivelesDesbloqueados } from '../utils/StorageManager';
+
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function ConfigScreen({ route, navigation }) {
   // Rescatamos los datos que nos mandó el HomeScreen
@@ -12,13 +14,16 @@ export default function ConfigScreen({ route, navigation }) {
   const [niveles, setNiveles] = useState({ FACIL: true, MEDIO: false, DIFICIL: false });
 
   // Hook para cargar el progreso del jugador apenas entra a la pantalla
-  useEffect(() => {
-    const cargarNiveles = async () => {
-      const nivelesGuardados = await obtenerNivelesDesbloqueados();
-      setNiveles(nivelesGuardados);
-    };
-    cargarNiveles();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const cargarNiveles = async () => {
+        // LE PASAMOS EL MODO COMO PARÁMETRO
+        const nivelesGuardados = await obtenerNivelesDesbloqueados(modo); 
+        setNiveles(nivelesGuardados);
+      };
+      cargarNiveles();
+    }, [modo]) // Se actualiza si el modo cambia
+  );
 
   const iniciarJuego = () => {
     const cantIteraciones = parseInt(iteraciones);
@@ -47,7 +52,7 @@ export default function ConfigScreen({ route, navigation }) {
         navigation.navigate('MultipleChoice', datosPartida);
         break;
       case 'RELOJ':
-        navigation.navigate('TimeAttack', datosPartida);
+        navigation.navigate('Contrarreloj', datosPartida);
         break;
     }
   };

@@ -49,14 +49,16 @@ export const obtenerHistorial = async () => {
  * Desbloquea un nuevo nivel de dificultad.
  * @param {string} nivel - 'MEDIO' o 'DIFICIL'
  */
-export const desbloquearNivel = async (nivel) => {
+export const desbloquearNivel = async (modo, nivel) => {
   try {
-    const nivelesString = await AsyncStorage.getItem(KEYS.NIVELES);
+    // Creamos una llave única, por ejemplo: '@niveles_desbloqueados_CLASICO'
+    const key = `${KEYS.NIVELES}_${modo}`; 
+    const nivelesString = await AsyncStorage.getItem(key);
     const niveles = nivelesString ? JSON.parse(nivelesString) : { FACIL: true, MEDIO: false, DIFICIL: false };
 
     niveles[nivel] = true;
 
-    await AsyncStorage.setItem(KEYS.NIVELES, JSON.stringify(niveles));
+    await AsyncStorage.setItem(key, JSON.stringify(niveles));
   } catch (error) {
     console.error('Error desbloqueando el nivel:', error);
   }
@@ -68,10 +70,10 @@ export const desbloquearNivel = async (nivel) => {
  * Consulta qué niveles están desbloqueados.
  * @returns {object} Ej: { FACIL: true, MEDIO: true, DIFICIL: false }
  */
-export const obtenerNivelesDesbloqueados = async () => {
+export const obtenerNivelesDesbloqueados = async (modo) => {
   try {
-    const nivelesString = await AsyncStorage.getItem(KEYS.NIVELES);
-    // Fácil siempre viene desbloqueado por defecto
+    const key = `${KEYS.NIVELES}_${modo}`;
+    const nivelesString = await AsyncStorage.getItem(key);
     return nivelesString ? JSON.parse(nivelesString) : { FACIL: true, MEDIO: false, DIFICIL: false };
   } catch (error) {
     console.error('Error obteniendo niveles:', error);

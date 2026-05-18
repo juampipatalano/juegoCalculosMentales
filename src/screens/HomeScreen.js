@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
+import { useState } from 'react';
+import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import RetroButton from '../components/RetroButton';
+import { reiniciarJuego } from '../utils/StorageManager';
+
 
 export default function HomeScreen({ navigation }) {
   //Guardamos el nombre del jugador en el estado de React
@@ -19,58 +21,84 @@ export default function HomeScreen({ navigation }) {
     });
   };
 
+  const handleReiniciar = () => {
+    Alert.alert(
+      "PELIGRO",
+      "¿Estás seguro de que querés borrar todo el progreso? Esto bloqueará los niveles y borrará el historial.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Sí, borrar todo", 
+          onPress: async () => {
+            await reiniciarJuego();
+            Alert.alert("Éxito", "Memoria borrada. ¡El juego está como nuevo!");
+          },
+          style: "destructive"
+        }
+      ]
+    );
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Título estilo Arcade/Calculadora */}
-      <View style={styles.header}>
-        <Text style={styles.title}>CALCU MATH</Text>
-        <Text style={styles.subtitle}>JUEGO DE CÁLCULOS MENTALES</Text>
-      </View>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        {/* Título estilo Arcade/Calculadora */}
+        <View style={styles.header}>
+          <Text style={styles.title}>CALCU MATH</Text>
+          <Text style={styles.subtitle}>JUEGO DE CÁLCULOS MENTALES</Text>
+        </View>
 
-      {/* Input retro para el nombre */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>JUGADOR:</Text>
-        <TextInput
-          style={styles.input}
-          value={nombre}
-          onChangeText={setNombre}
-          placeholder="INGRESA TU NOMBRE"
-          placeholderTextColor="#5c6b4a" // Verde más oscuro
-          maxLength={15}
-        />
-      </View>
+        {/* Input retro para el nombre */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>JUGADOR:</Text>
+          <TextInput
+            style={styles.input}
+            value={nombre}
+            onChangeText={setNombre}
+            placeholder="INGRESA TU NOMBRE"
+            placeholderTextColor="#5c6b4a" // Verde más oscuro
+            maxLength={15}
+          />
+        </View>
 
-      {/* Botones de los 4 modos */}
-      <View style={styles.buttonGrid}>
-        <RetroButton 
-          title="MODO CLÁSICO" 
-          onPress={() => irAConfiguracion('CLASICO')} 
-        />
-        <RetroButton 
-          title="VERDADERO / FALSO" 
-          onPress={() => irAConfiguracion('TF')} 
-        />
-        <RetroButton 
-          title="MÚLTIPLE CHOICE" 
-          onPress={() => irAConfiguracion('CHOICE')} 
-        />
-        <RetroButton 
-          title="CONTRA RELOJ" 
-          onPress={() => irAConfiguracion('RELOJ')} 
-          isAction={true} // Lo hacemos verde para que resalte
-        />
-      </View>
+        {/* Botones de los 4 modos */}
+        <View style={styles.buttonGrid}>
+          <RetroButton 
+            title="MODO CLÁSICO" 
+            onPress={() => irAConfiguracion('CLASICO')} 
+          />
+          <RetroButton 
+            title="VERDADERO / FALSO" 
+            onPress={() => irAConfiguracion('TF')} 
+          />
+          <RetroButton 
+            title="MÚLTIPLE CHOICE" 
+            onPress={() => irAConfiguracion('CHOICE')} 
+          />
+          <RetroButton 
+            title="CONTRA RELOJ" 
+            onPress={() => irAConfiguracion('RELOJ')} 
+            isAction={true} // Lo hacemos verde para que resalte
+          />
+        </View>
 
-      {/* Botón de estadísticas abajo de todo */}
-      <View style={styles.footer}>
-        <RetroButton 
-          title="VER ESTADÍSTICAS" 
-          onPress={() => navigation.navigate('Stats')} 
-          style={styles.statsBtn} 
-          textStyle={styles.statsText}
-        />
+        {/* Botón de estadísticas abajo de todo */}
+        <View style={styles.footer}>
+          <RetroButton 
+            title="VER ESTADÍSTICAS" 
+            onPress={() => navigation.navigate('Stats')} 
+            style={styles.statsBtn} 
+            textStyle={styles.statsText}
+          />
+          <RetroButton 
+            title="REINICIAR DATOS" 
+            onPress={handleReiniciar} 
+            style={styles.resetBtn} 
+            textStyle={styles.resetText}
+          />
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 

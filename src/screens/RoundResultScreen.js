@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import RetroButton from '../components/RetroButton';
 
 export default function RoundResultScreen({ route, navigation }) {
@@ -24,10 +23,12 @@ export default function RoundResultScreen({ route, navigation }) {
     // Dejamos preparados los otros modos para cuando los armemos
     if (modo === 'TF') screenName = 'TrueFalse';
     if (modo === 'CHOICE') screenName = 'MultipleChoice';
-    if (modo === 'RELOJ') screenName = 'TimeAttack';
+    if (modo === 'RELOJ') screenName = 'Contrarreloj';
+
+    const iteracionesReales = route.params.tiempoTotalOriginal || iteraciones;
 
     // replace() borra la pantalla de resultados y vuelve a montar el juego limpio
-    navigation.replace(screenName, { nombreJugador, modo, dificultad, iteraciones });
+    navigation.replace(screenName, { nombreJugador, modo, dificultad, iteraciones: iteracionesReales });
   };
 
   return (

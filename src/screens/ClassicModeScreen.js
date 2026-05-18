@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import VintageDisplay from '../components/VintageDisplay';
+import { useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import CustomNumpad from '../components/CustomNumpad';
-import { generarOperacion, calcularPuntaje } from '../utils/MathEngine';
+import VintageDisplay from '../components/VintageDisplay';
+import { calcularPuntaje, generarOperacion } from '../utils/MathEngine';
 import { desbloquearNivel, guardarPartida } from '../utils/StorageManager';
 
 export default function ClassicModeScreen({ route, navigation }) {
@@ -103,10 +103,10 @@ export default function ClassicModeScreen({ route, navigation }) {
 
     if (aciertosFinales === iteraciones) {
       if (dificultad === 'FACIL') {
-        await desbloquearNivel('MEDIO');
+        await desbloquearNivel(modo, 'MEDIO'); // AGREGAMOS "modo" ACÁ
         nivelDesbloqueado = true;
       } else if (dificultad === 'MEDIO') {
-        await desbloquearNivel('DIFICIL');
+        await desbloquearNivel(modo, 'DIFICIL'); // AGREGAMOS "modo" ACÁ
         nivelDesbloqueado = true;
       }
     }
