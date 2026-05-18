@@ -7,6 +7,7 @@ import ClassicModeScreen from '../screens/ClassicModeScreen';
 import TrueFalseScreen from '../screens/TrueFalseScreen';
 import MultipleChoiceScreen from '../screens/MultipleChoiceScreen';
 import ContrarrelojScreen from '../screens/ContrarrelojScreen';
+import RoundResultScreen from '../screens/RoundResultScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,7 @@ export default function AppNavigator() {
       <Stack.Screen name="TrueFalse" component={TrueFalseScreen} options={{ title: 'VERDADERO/FALSO' }}/>
       <Stack.Screen name="MultipleChoice" component={MultipleChoiceScreen} options={{ title: 'MULTIPLE CHOICE' }}/>
       <Stack.Screen name="Contrarreloj" component={ContrarrelojScreen} options={{ title: 'CONTRARRELOJ' }}/>
+      <Stack.Screen name="RoundResult" component={RoundResultScreen} options={{ title: 'RESUMEN DE RONDA', headerShown: false }}/>
     </Stack.Navigator>
   );
 }
