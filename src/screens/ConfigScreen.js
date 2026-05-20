@@ -45,10 +45,10 @@ export default function ConfigScreen({ route, navigation }) {
       case 'CLASICO':
         navigation.navigate('ClassicMode', datosPartida);
         break;
-      case 'VERDADERO/FALSO':
+      case 'TF':
         navigation.navigate('TrueFalse', datosPartida);
         break;
-      case 'MULTIPLE CHOICE':
+      case 'CHOICE':
         navigation.navigate('MultipleChoice', datosPartida);
         break;
       case 'RELOJ':
