@@ -4,10 +4,10 @@ import CustomNumpad from '../components/CustomNumpad';
 import VintageDisplay from '../components/VintageDisplay';
 import { calcularPuntaje, generarOperacion } from '../utils/MathEngine';
 import { desbloquearNivel, guardarPartida } from '../utils/StorageManager';
+import { playSound } from '../utils/SoundManager';
 
 export default function ClassicModeScreen({ route, navigation }) {
-  const { nombreJugador, modo, dificultad, iteraciones } = route.params;
-
+  const { nombreJugador, modo, dificultad, iteraciones, tiempoPorOperacion } = route.params;
   const [rondaActual, setRondaActual] = useState(1);
   const [puntaje, setPuntaje] = useState(0);
   const [aciertos, setAciertos] = useState(0);
@@ -21,7 +21,7 @@ export default function ClassicModeScreen({ route, navigation }) {
   const tiempoInicioRef = useRef(0);
   const tiempoTotalAcumuladoRef = useRef(0);
 
-  const tiempoMaximo = dificultad === 'FACIL' ? 10000 : dificultad === 'MEDIO' ? 7000 : 5000;
+  const tiempoMaximo = tiempoPorOperacion * 1000;
 
   // 1. CARGA DE DATOS (Solo actualiza el estado, ya no crea relojes)
   const cargarNuevaOperacion = () => {
@@ -38,21 +38,23 @@ export default function ClassicModeScreen({ route, navigation }) {
     cargarNuevaOperacion();
   }, []);
 
-  // 2. EL NUEVO MOTOR DEL RELOJ (Infalible)
-  // Este useEffect "vigila" el tiempo restante. Reemplaza al problemático setInterval.
+
+  // Este useEffect "vigila" el tiempo restante.
   useEffect(() => {
     // Si no hay operación, no hacemos nada
     if (!operacionActual) return;
 
     // Si todavía hay tiempo, programamos que baje 1 segundo
     if (tiempoRestante > 0) {
-      if (tiempoRestante <= 3) setIsDanger(true);
+      if (tiempoRestante <= 3){
+        setIsDanger(true);
+        playSound('alerta');
+      } 
 
       timerRef.current = setTimeout(() => {
         setTiempoRestante(prev => prev - 1);
       }, 1000);
 
-      // Limpieza vital: si el componente se actualiza antes del segundo, cancela este timeout
       return () => clearTimeout(timerRef.current);
     } 
     // Si el tiempo llega a cero, forzamos el timeout de forma segura
@@ -71,6 +73,7 @@ export default function ClassicModeScreen({ route, navigation }) {
 
   // 3. PROCESAMIENTO
   const procesarRespuesta = (fueTimeout = false) => {
+    
     // Frenamos cualquier timeout pendiente al instante
     clearTimeout(timerRef.current);
     
@@ -83,7 +86,12 @@ export default function ClassicModeScreen({ route, navigation }) {
     const esCorrecta = !fueTimeout && numUsuario === operacionActual.resultadoCorrecto;
 
     const nuevosAciertos = aciertos + (esCorrecta ? 1 : 0);
-    if (esCorrecta) setAciertos(nuevosAciertos);
+    if (esCorrecta) {
+      playSound('acierto');
+      setAciertos(nuevosAciertos);
+    } else {
+      playSound('error');
+    }
 
     const puntosObtenidos = calcularPuntaje(esCorrecta, tiempoTardado, tiempoMaximo);
     const nuevoPuntaje = puntaje + puntosObtenidos;
@@ -112,6 +120,7 @@ export default function ClassicModeScreen({ route, navigation }) {
     }
 
     await guardarPartida({
+      nombre: nombreJugador,
       modo, 
       dificultad,
       puntaje: puntajeFinal,
@@ -127,7 +136,8 @@ export default function ClassicModeScreen({ route, navigation }) {
       puntajeFinal,
       aciertosFinales,
       tiempoPromedio: promedio,
-      nivelDesbloqueado
+      nivelDesbloqueado,
+      tiempoPorOperacion: tiempoPorOperacion
     });
   };
 

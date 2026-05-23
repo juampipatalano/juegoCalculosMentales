@@ -5,9 +5,10 @@ import VintageDisplay from '../components/VintageDisplay';
 import VintageFrame from '../components/VintageFrame';
 import { calcularPuntaje, generarOperacion } from '../utils/MathEngine';
 import { desbloquearNivel, guardarPartida } from '../utils/StorageManager';
+import { playSound } from '../utils/SoundManager';
 
 export default function MultipleChoiceScreen({ route, navigation }) {
-  const { nombreJugador, modo, dificultad, iteraciones } = route.params;
+  const { nombreJugador, modo, dificultad, iteraciones, tiempoPorOperacion } = route.params;
 
   const [rondaActual, setRondaActual] = useState(1);
   const [puntaje, setPuntaje] = useState(0);
@@ -22,7 +23,7 @@ export default function MultipleChoiceScreen({ route, navigation }) {
   const tiempoInicioRef = useRef(0);
   const tiempoTotalAcumuladoRef = useRef(0);
 
-  const tiempoMaximo = dificultad === 'FACIL' ? 10000 : dificultad === 'MEDIO' ? 7000 : 5000;
+  const tiempoMaximo = tiempoPorOperacion * 1000;
 
   const cargarNuevaOperacion = () => {
     const nuevaOp = generarOperacion(dificultad);
@@ -64,7 +65,12 @@ export default function MultipleChoiceScreen({ route, navigation }) {
     const esCorrecta = !fueTimeout && (opcionElegida === operacionActual.resultadoCorrecto);
 
     const nuevosAciertos = aciertos + (esCorrecta ? 1 : 0);
-    if (esCorrecta) setAciertos(nuevosAciertos);
+    if (esCorrecta){
+      playSound('acierto');
+      setAciertos(nuevosAciertos);
+    } else {
+      playSound('error');
+    }
 
     const puntosObtenidos = calcularPuntaje(esCorrecta, tiempoTardado, tiempoMaximo);
     const nuevoPuntaje = puntaje + puntosObtenidos;
@@ -88,6 +94,7 @@ export default function MultipleChoiceScreen({ route, navigation }) {
     }
 
     await guardarPartida({
+      nombre: nombreJugador,
       modo, 
       dificultad,
       puntaje: puntajeFinal,
@@ -103,7 +110,8 @@ export default function MultipleChoiceScreen({ route, navigation }) {
       puntajeFinal,
       aciertosFinales,
       tiempoPromedio: promedio,
-      nivelDesbloqueado
+      nivelDesbloqueado,
+      tiempoPorOperacion: tiempoPorOperacion
     });
   };
 
@@ -155,8 +163,7 @@ export default function MultipleChoiceScreen({ route, navigation }) {
             <RetroButton 
               title={operacionActual.opciones[3].toString()} 
               onPress={() => procesarRespuesta(operacionActual.opciones[3])}
-              isAction={true} // El último botón lo hacemos verde para variar el diseño
-              style={styles.optionBtn}
+              style={styles.optionBtn} // Le sacamos el isAction={true} para que sea gris neutral
             />
           </View>
         </View>

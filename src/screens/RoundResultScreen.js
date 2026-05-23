@@ -11,7 +11,8 @@ export default function RoundResultScreen({ route, navigation }) {
     puntajeFinal, 
     aciertosFinales, 
     tiempoPromedio,
-    nivelDesbloqueado 
+    nivelDesbloqueado,
+    tiempoPorOperacion 
   } = route.params;
 
   // Calculamos el porcentaje de precisión para el reporte
@@ -28,7 +29,13 @@ export default function RoundResultScreen({ route, navigation }) {
     const iteracionesReales = route.params.tiempoTotalOriginal || iteraciones;
 
     // replace() borra la pantalla de resultados y vuelve a montar el juego limpio
-    navigation.replace(screenName, { nombreJugador, modo, dificultad, iteraciones: iteracionesReales });
+    navigation.replace(screenName, { 
+      nombreJugador, 
+      modo, 
+      dificultad, 
+      iteraciones: iteracionesReales,
+      tiempoPorOperacion
+    });
   };
 
   return (
@@ -94,7 +101,7 @@ export default function RoundResultScreen({ route, navigation }) {
         />
         <RetroButton 
           title="MENÚ PRINCIPAL" 
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate('Home', {nombreRegreso: nombreJugador})}
           style={styles.menuBtn}
         />
       </View>

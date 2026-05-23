@@ -4,9 +4,10 @@ import CustomNumpad from '../components/CustomNumpad';
 import VintageDisplay from '../components/VintageDisplay';
 import { calcularPuntaje, generarOperacion } from '../utils/MathEngine';
 import { desbloquearNivel, guardarPartida } from '../utils/StorageManager';
+import { playSound } from '../utils/SoundManager';
 
 export default function ContrarrelojScreen({ route, navigation }) {
-  const { nombreJugador, modo, dificultad, iteraciones: tiempoTotalAsignado } = route.params;
+  const { nombreJugador, modo, dificultad, iteraciones: tiempoTotalAsignado, tiempoPorOperacion } = route.params;
 
   const [rondaActual, setRondaActual] = useState(1);
   const [puntaje, setPuntaje] = useState(0);
@@ -27,7 +28,7 @@ export default function ContrarrelojScreen({ route, navigation }) {
   // CANDADO MAESTRO: Evita que los dos relojes se disparen al mismo tiempo
   const isGameOverRef = useRef(false);
 
-  const tiempoMaximoPregunta = dificultad === 'FACIL' ? 10000 : dificultad === 'MEDIO' ? 7000 : 5000;
+  const tiempoMaximoPregunta = tiempoPorOperacion * 1000;
 
   const cargarNuevaOperacion = () => {
     const nuevaOp = generarOperacion(dificultad);
@@ -96,6 +97,7 @@ export default function ContrarrelojScreen({ route, navigation }) {
     const esCorrecta = !fueTimeout && numUsuario === operacionActual.resultadoCorrecto;
     
     if (esCorrecta) {
+      playSound('acierto');
       tiempoTotalAcumuladoRef.current += tiempoTardado;
       aciertosRef.current += 1;
       
@@ -106,6 +108,7 @@ export default function ContrarrelojScreen({ route, navigation }) {
       setRondaActual(prev => prev + 1);
       cargarNuevaOperacion(); 
     } else {
+      playSound('error');
       // MUERTE SÚBITA: Contestó mal o se le acabó el tiempo de la operación
       isGameOverRef.current = true;
       clearTimeout(globalTimerRef.current);
@@ -142,6 +145,7 @@ export default function ContrarrelojScreen({ route, navigation }) {
     const rondasJugadas = totalAciertos + (motivo === 'FALLO' ? 1 : 0);
 
     await guardarPartida({
+      nombre: nombreJugador,
       modo, 
       dificultad,
       puntaje: scoreFinal,
@@ -158,22 +162,31 @@ export default function ContrarrelojScreen({ route, navigation }) {
       puntajeFinal: scoreFinal,
       aciertosFinales: totalAciertos,
       tiempoPromedio: promedio,
-      nivelDesbloqueado
+      nivelDesbloqueado,
+      tiempoPorOperacion: tiempoPorOperacion
     });
   };
 
   if (!operacionActual) return null;
 
+  //calculamos el porcentaje de la barra de tiempo (de 100% a 0%)
+  const progresoPorcentaje = Math.max(0, (tiempoRestanteGlobal / tiempoTotalAsignado) * 100);
+
   return (
     <View style={styles.container}>
+      {/* BARRA DE PROGRESO GLOBAL */}
+      <View style={styles.progressBarContainer}>
+        <View style={[styles.progressBarFill, { width: `${progresoPorcentaje}%` }]} />
+      </View>
+
       <View style={styles.hud}>
         <View style={styles.statsContainer}>
-          <Text style={styles.hudText}>OP: {rondaActual}</Text>
-          <Text style={styles.hudText}>PTS: {puntaje}</Text>
+          <Text style={styles.hudText}>OPERACIONES: {rondaActual}</Text>
+          <Text style={styles.hudText}>PUNTOS: {puntaje}</Text>
         </View>
         {/* El reloj gigante ahora muestra el tiempo GLOBAL de la partida */}
         <Text style={[styles.timerText, isDanger && styles.dangerText]}>
-          {tiempoRestanteGlobal}s
+          {tiempoRestanteOp}s
         </Text>
       </View>
 
@@ -224,5 +237,19 @@ const styles = StyleSheet.create({
   },
   dangerText: {
     color: '#ff4d4d',
-  }
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 10,
+    backgroundColor: '#0a0d0a',
+    borderWidth: 1,
+    borderColor: '#4d4f4d',
+    borderRadius: 5,
+    marginBottom: 20,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#97ad7c',
+  },
 });

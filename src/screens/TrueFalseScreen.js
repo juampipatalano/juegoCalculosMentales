@@ -5,9 +5,10 @@ import VintageDisplay from '../components/VintageDisplay';
 import VintageFrame from '../components/VintageFrame'; // IMPORTAMOS EL FRAME
 import { calcularPuntaje, generarOperacion } from '../utils/MathEngine';
 import { desbloquearNivel, guardarPartida } from '../utils/StorageManager';
+import { playSound } from '../utils/SoundManager';
 
 export default function TrueFalseScreen({ route, navigation }) {
-  const { nombreJugador, modo, dificultad, iteraciones } = route.params;
+  const { nombreJugador, modo, dificultad, iteraciones, tiempoPorOperacion } = route.params;
 
   const [rondaActual, setRondaActual] = useState(1);
   const [puntaje, setPuntaje] = useState(0);
@@ -22,7 +23,7 @@ export default function TrueFalseScreen({ route, navigation }) {
   const tiempoInicioRef = useRef(0);
   const tiempoTotalAcumuladoRef = useRef(0);
 
-  const tiempoMaximo = dificultad === 'FACIL' ? 10000 : dificultad === 'MEDIO' ? 7000 : 5000;
+  const tiempoMaximo = tiempoPorOperacion * 1000;
 
   const cargarNuevaOperacion = () => {
     const nuevaOp = generarOperacion(dificultad);
@@ -63,7 +64,12 @@ export default function TrueFalseScreen({ route, navigation }) {
     const esCorrecta = !fueTimeout && (respuestaUsuario === operacionActual.tfEsCorrecto);
 
     const nuevosAciertos = aciertos + (esCorrecta ? 1 : 0);
-    if (esCorrecta) setAciertos(nuevosAciertos);
+    if (esCorrecta){
+      playSound('acierto');
+      setAciertos(nuevosAciertos);
+    } else {
+      playSound('error');
+    }
 
     const puntosObtenidos = calcularPuntaje(esCorrecta, tiempoTardado, tiempoMaximo);
     const nuevoPuntaje = puntaje + puntosObtenidos;
@@ -92,6 +98,7 @@ export default function TrueFalseScreen({ route, navigation }) {
     }
 
     await guardarPartida({
+      nombre: nombreJugador,
       modo, 
       dificultad,
       puntaje: puntajeFinal,
@@ -107,7 +114,8 @@ export default function TrueFalseScreen({ route, navigation }) {
       puntajeFinal,
       aciertosFinales,
       tiempoPromedio: promedio,
-      nivelDesbloqueado
+      nivelDesbloqueado,
+      tiempoPorOperacion: tiempoPorOperacion
     });
   };
 

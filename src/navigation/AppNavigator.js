@@ -8,6 +8,8 @@ import TrueFalseScreen from '../screens/TrueFalseScreen';
 import MultipleChoiceScreen from '../screens/MultipleChoiceScreen';
 import ContrarrelojScreen from '../screens/ContrarrelojScreen';
 import RoundResultScreen from '../screens/RoundResultScreen';
+import RankingsScreen from '../screens/RankingsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +32,8 @@ export default function AppNavigator() {
       <Stack.Screen name="MultipleChoice" component={MultipleChoiceScreen} options={{ title: 'MULTIPLE CHOICE' }}/>
       <Stack.Screen name="Contrarreloj" component={ContrarrelojScreen} options={{ title: 'CONTRARRELOJ' }}/>
       <Stack.Screen name="RoundResult" component={RoundResultScreen} options={{ title: 'RESUMEN DE RONDA', headerShown: false }}/>
+      <Stack.Screen name="Rankings" component={RankingsScreen} options={{ title: 'RANKINGS' }}/>
+      <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'AJUSTES' }}/>
     </Stack.Navigator>
   );
 }

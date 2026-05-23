@@ -1,43 +1,43 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import RetroButton from '../components/RetroButton';
-import { reiniciarJuego } from '../utils/StorageManager';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation, route }) {
   //Guardamos el nombre del jugador en el estado de React
   const [nombre, setNombre] = useState('');
 
+
+  // Recupera el nombre guardado cada vez que el usuario vuelve al Menú Principal
+  useEffect(() => {
+    if (route.params?.nombreRegreso) {
+      setNombre(route.params.nombreRegreso);
+    }
+  }, [route.params?.nombreRegreso]);
+    
+
   //Función para validar y navegar a la siguiente pantalla
-  const irAConfiguracion = (modoElegido) => {
+  const irAConfiguracion = async (modoElegido) => {
     if (nombre.trim() === '') {
       Alert.alert('Falta un dato', 'Por favor, ingresá tu nombre de jugador.');
       return;
     }
-    //Viajamos a la pantalla Config y le pasamos los datos necesarios para configurar la partida
+    
+    // Forzamos el uppercase directo en la variable que viaja y se guarda
+    const nombreLimpio = nombre.trim().toUpperCase(); 
+    
+    try {
+      await AsyncStorage.setItem('@nombre_jugador', nombreLimpio);
+    } catch (e) {
+      console.error(e);
+    }
     navigation.navigate('Config', { 
-      nombreJugador: nombre, 
+      nombreJugador: nombreLimpio, 
       modo: modoElegido 
     });
   };
 
-  const handleReiniciar = () => {
-    Alert.alert(
-      "PELIGRO",
-      "¿Estás seguro de que querés borrar todo el progreso? Esto bloqueará los niveles y borrará el historial.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { 
-          text: "Sí, borrar todo", 
-          onPress: async () => {
-            await reiniciarJuego();
-            Alert.alert("Éxito", "Memoria borrada. ¡El juego está como nuevo!");
-          },
-          style: "destructive"
-        }
-      ]
-    );
-  };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -58,6 +58,9 @@ export default function HomeScreen({ navigation }) {
             placeholder="INGRESA TU NOMBRE"
             placeholderTextColor="#5c6b4a" // Verde más oscuro
             maxLength={15}
+            autoCapitalize="characters"
+            autoCorrect={false}
+
           />
         </View>
 
@@ -91,10 +94,16 @@ export default function HomeScreen({ navigation }) {
             textStyle={styles.statsText}
           />
           <RetroButton 
-            title="REINICIAR DATOS" 
-            onPress={handleReiniciar} 
-            style={styles.resetBtn} 
-            textStyle={styles.resetText}
+            title="VER RANKINGS" 
+            onPress={() => navigation.navigate('Rankings')} 
+            style={styles.secondaryBtn} 
+            textStyle={styles.secondaryText}
+          />
+          <RetroButton 
+            title="AJUSTES" 
+            onPress={() => navigation.navigate('Settings')} 
+            style={styles.secondaryBtn} 
+            textStyle={styles.secondaryText}
           />
         </View>
       </View>
@@ -164,5 +173,26 @@ const styles = StyleSheet.create({
   statsText: {
     fontSize: 18,
     color: '#a3a3a3',
+  },
+  secondaryBtn: {
+    backgroundColor: '#2a2d2a',
+    borderBottomWidth: 2,
+    borderBottomColor: '#1a1a1a',
+    marginBottom: 10,
+    height: 60, // Un poco más pequeños que los principales
+  },
+  secondaryText: {
+    fontSize: 16,
+    color: '#a3a3a3',
+  },
+  resetBtn: {
+    backgroundColor: '#3b1a1a', 
+    borderBottomColor: '#1a0a0a',
+    borderBottomWidth: 2,
+    height: 50,
+  },
+  resetText: {
+    fontSize: 14,
+    color: '#ff4d4d', 
   }
 });

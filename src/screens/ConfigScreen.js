@@ -11,6 +11,7 @@ export default function ConfigScreen({ route, navigation }) {
 
   const [dificultad, setDificultad] = useState('FACIL');
   const [iteraciones, setIteraciones] = useState('10');
+  const [tiempoPorOperacion, setTiempoPorOperacion] = useState('10');
   const [niveles, setNiveles] = useState({ FACIL: true, MEDIO: false, DIFICIL: false });
 
   // Hook para cargar el progreso del jugador apenas entra a la pantalla
@@ -27,7 +28,8 @@ export default function ConfigScreen({ route, navigation }) {
 
   const iniciarJuego = () => {
     const cantIteraciones = parseInt(iteraciones);
-    if (isNaN(cantIteraciones) || cantIteraciones < 1) {
+    const segundos = parseInt(tiempoPorOperacion);
+    if (isNaN(cantIteraciones) || cantIteraciones < 1 || isNaN(segundos) || segundos <= 0) {
       Alert.alert('Dato Inválido', 'Ingresá un número válido.');
       return;
     }
@@ -37,7 +39,8 @@ export default function ConfigScreen({ route, navigation }) {
       nombreJugador,
       modo,
       dificultad,
-      iteraciones: cantIteraciones
+      iteraciones: cantIteraciones,
+      tiempoPorOperacion: segundos
     };
 
     // Derivamos a la pantalla correcta según el modo que eligió en el inicio
@@ -104,6 +107,19 @@ export default function ConfigScreen({ route, navigation }) {
           />
         </View>
 
+        <View style={styles.configGroup}>
+          <Text style={styles.label}>TIEMPO POR OPERACIÓN (SEG):</Text>
+          <TextInput
+            style={styles.input}
+            value={tiempoPorOperacion}
+            onChangeText={setTiempoPorOperacion}
+            keyboardType="numeric"
+            maxLength={2}
+            placeholder="10"
+            placeholderTextColor="#5c6b4a"
+          />
+        </View>
+
         <RetroButton
           title="¡INICIAR PARTIDA!"
           onPress={iniciarJuego}
@@ -167,5 +183,8 @@ const styles = StyleSheet.create({
   },
   diffTextLocked: {
     color: '#4a4a4a',
-  }
+  },
+  configGroup: {
+    marginVertical: 10,
+  },
 });

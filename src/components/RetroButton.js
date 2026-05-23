@@ -1,12 +1,19 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { playSound } from '../utils/SoundManager';
 
 export default function RetroButton({ title, onPress, style, textStyle, isAction = false }) {
+  
+  const handlePress = async () => {
+    playSound('click'); // Reproduce el sonido en segundo plano
+    if (onPress) onPress(); // Ejecuta la acción original del botón
+  };
+  
   return (
     <TouchableOpacity 
       // Si isAction es true, le suma los estilos especiales
       style={[styles.button, isAction && styles.actionButton, style]} 
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.7} // Efecto visual al presionar
     >
       <Text style={[styles.text, isAction && styles.actionText, textStyle]}>
